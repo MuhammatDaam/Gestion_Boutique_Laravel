@@ -1,0 +1,246 @@
+openapi: 3.0.0
+info:
+  title: API de gestion
+  description: API pour la gestion des utilisateurs, des clients, des articles et des dettes.
+  version: 1.0.0
+  contact:
+    name: Support API
+    email: support@api.com
+servers:
+  - url: /api/v1
+    description: Version 1 de l'API
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+        surname:
+          type: string
+        adresse:
+          type: string
+        telephone:
+          type: string
+        user_id:
+          type: integer
+        photo:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        login:
+          type: string
+        role:
+          type: string
+        active:
+          type: boolean
+    Article:
+      type: object
+      properties:
+        id:
+          type: integer
+        libelle:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+    Dette:
+      type: object
+      properties:
+        id:
+          type: integer
+        montant:
+          type: number
+        client_id:
+          type: integer
+        article_id:
+          type: integer
+        paiement:
+          type: boolean
+        date:
+          type: string
+          format: date
+        statut:
+          type: string
+
+security:
+  - bearerAuth: []
+
+paths:
+  /login:
+    post:
+      summary: Connexion de l'utilisateur
+      description: Permet à un utilisateur de se connecter et d'obtenir un token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Token généré avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        '401':
+          description: Identifiants invalides.
+  
+  /logout:
+    post:
+      security:
+        - bearerAuth: []
+      summary: Déconnexion de l'utilisateur
+      description: Permet à un utilisateur de se déconnecter en invalidant son token.
+      responses:
+        '200':
+          description: Déconnexion réussie.
+
+  /users:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Liste des utilisateurs
+      description: Récupère une liste de tous les utilisateurs.
+      responses:
+        '200':
+          description: Liste des utilisateurs récupérée avec succès.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  
+  /clients:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Liste des clients
+      description: Récupère une liste des clients.
+      responses:
+        '200':
+          description: Liste des clients récupérée avec succès.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+
+    post:
+      security:
+        - bearerAuth: []
+      summary: Créer un nouveau client
+      description: Ajoute un nouveau client à la base de données.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Client'
+      responses:
+        '201':
+          description: Client créé avec succès.
+  
+  /clients/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Récupérer un client par ID
+      description: Récupère les détails d'un client spécifique en fonction de son ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Client récupéré avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Client non trouvé.
+
+  /articles:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Liste des articles
+      description: Récupère une liste des articles.
+      responses:
+        '200':
+          description: Liste des articles récupérée avec succès.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Article'
+    
+    post:
+      security:
+        - bearerAuth: []
+      summary: Ajouter un article
+      description: Ajoute un nouvel article.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Article'
+      responses:
+        '201':
+          description: Article créé avec succès.
+
+  /articles/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Récupérer un article par ID
+      description: Récupère les détails d'un article spécifique par son ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Article récupéré avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: Article non trouvé.

@@ -1,0 +1,650 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Gestion de Boutique API",
+      "version": "1.0.0",
+      "description": "Documentation de l'API pour la gestion de la boutique."
+    },
+    "servers": [
+      {
+        "url": "http://127.0.0.1:3000/api/v1"
+      }
+    ],
+    "components": {
+      "securitySchemes": {
+        "BearerToken": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT",
+          "description": "JWT authorization header using the Bearer scheme."
+        }
+      },
+      "security": [
+        {
+          "BearerToken": []
+        }
+      ],
+      "schemas": {
+        "Client": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "example": 1
+            },
+            "surname": {
+              "type": "string",
+              "example": "Doe"
+            },
+            "adresse": {
+              "type": "string",
+              "example": "123 Main St"
+            },
+            "telephone": {
+              "type": "string",
+              "example": "+123456789"
+            },
+            "user": {
+              "type": "object",
+              "properties": {
+                "nom": {
+                  "type": "string",
+                  "example": "John"
+                },
+                "prenom": {
+                  "type": "string",
+                  "example": "Doe"
+                },
+                "login": {
+                  "type": "string",
+                  "example": "johndoe"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password123"
+                },
+                "role_id": {
+                  "type": "integer",
+                  "example": 1
+                }
+              }
+            }
+          }
+        },
+        "User": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "example": 1
+            },
+            "nom": {
+              "type": "string",
+              "example": "John"
+            },
+            "prenom": {
+              "type": "string",
+              "example": "Doe"
+            },
+            "login": {
+              "type": "string",
+              "example": "johndoe"
+            },
+            "password": {
+              "type": "string",
+              "example": "password123"
+            },
+            "role_id": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        },
+        "Article": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "example": 1
+            },
+            "libelle": {
+              "type": "string",
+              "example": "Article Name"
+            },
+            "description": {
+              "type": "string",
+              "example": "Article description"
+            },
+            "prix": {
+              "type": "number",
+              "format": "float",
+              "example": 99.99
+            },
+            "stock": {
+              "type": "integer",
+              "example": 100
+            }
+          }
+        }
+      }
+    },
+    "paths": {
+      "/login": {
+        "post": {
+          "summary": "Authentifie un utilisateur",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "login": {
+                      "type": "string"
+                    },
+                    "password": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["login", "password"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Connexion réussie",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "user": {
+                        "$ref": "#/components/schemas/User"
+                      },
+                      "access_token": {
+                        "type": "string"
+                      },
+                      "refresh_token": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Identifiants incorrects"
+            }
+          }
+        }
+      },
+      "/refresh": {
+        "post": {
+          "summary": "Rafraîchit le jeton d'accès",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "refresh_token": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["refresh_token"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Jeton rafraîchi avec succès",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "access_token": {
+                        "type": "string"
+                      },
+                      "token_type": {
+                        "type": "string",
+                        "example": "Bearer"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Jeton de rafraîchissement invalide"
+            }
+          }
+        }
+      },
+      "/logout": {
+        "post": {
+          "summary": "Déconnecte l'utilisateur",
+          "responses": {
+            "200": {
+              "description": "Déconnexion réussie"
+            }
+          }
+        }
+      },
+      "/users": {
+        "get": {
+          "summary": "Liste des utilisateurs",
+          "responses": {
+            "200": {
+              "description": "Liste des utilisateurs",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "summary": "Crée un nouvel utilisateur",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Utilisateur créé avec succès",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Entrée invalide"
+            }
+          }
+        }
+      },
+      "/user": {
+        "get": {
+          "summary": "Récupère les détails de l'utilisateur connecté",
+          "responses": {
+            "200": {
+              "description": "Détails de l'utilisateur",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/clients": {
+        "get": {
+          "summary": "Liste des clients",
+          "parameters": [
+            {
+              "name": "comptes",
+              "in": "query",
+              "description": "Filtre les clients en fonction de la présence d'utilisateurs associés",
+              "schema": {
+                "type": "string",
+                "enum": ["oui", "non"]
+              }
+            },
+            {
+              "name": "active",
+              "in": "query",
+              "description": "Filtre les clients en fonction du statut d'activation des utilisateurs",
+              "schema": {
+                "type": "string",
+                "enum": ["oui", "non"]
+              }
+            },
+            {
+              "name": "include",
+              "in": "query",
+              "description": "Liste séparée par des virgules des relations à inclure",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Liste des clients",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Client"
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Paramètres invalides"
+            }
+          }
+        },
+        "post": {
+          "summary": "Crée un nouveau client",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Client créé avec succès",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Client"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Entrée invalide"
+            }
+          }
+        }
+      },
+      "/v1/clients/telephone": {
+        "post": {
+          "summary": "Filtre les clients par numéro de téléphone",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "telephone": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["telephone"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Liste des clients avec le numéro de téléphone spécifié",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Client"
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Entrée invalide"
+            }
+          }
+        }
+      },
+      "/v1/clients/{id}": {
+        "get": {
+          "summary": "Récupère un client par son ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Détails du client",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Client"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Client non trouvé"
+            }
+          }
+        }
+      },
+      "/v1/articles": {
+        "post": {
+          "summary": "Crée un nouvel article",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Article"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Article créé avec succès",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Article"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Entrée invalide"
+            }
+          }
+        }
+      },
+      "/v1/articles/{id}": {
+        "get": {
+          "summary": "Affiche un article par ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Détails de l'article",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Article"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Article non trouvé"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Effectue une suppression douce d'un article",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Article supprimé avec succès"
+            },
+            "404": {
+              "description": "Article non trouvé"
+            }
+          }
+        }
+      },
+      "/v1/articles/{id}/restore": {
+        "patch": {
+          "summary": "Restaure un article supprimé",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Article restauré avec succès"
+            },
+            "404": {
+              "description": "Article non trouvé"
+            }
+          }
+        }
+      },
+      "/v1/articles/{id}/force-delete": {
+        "delete": {
+          "summary": "Effectue une suppression forcée d'un article",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Article supprimé avec succès"
+            },
+            "404": {
+              "description": "Article non trouvé"
+            }
+          }
+        }
+      },
+      "/v1/articles/libelle": {
+        "post": {
+          "summary": "Recherche des articles par libellé",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "libelle": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["libelle"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Liste des articles correspondant au libellé",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Article"
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Entrée invalide"
+            }
+          }
+        }
+      },
+      "/v1/articles/stock": {
+        "post": {
+          "summary": "Met à jour plusieurs articles",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "articles": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Article"
+                      }
+                    }
+                  },
+                  "required": ["articles"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Articles mis à jour avec succès"
+            },
+            "400": {
+              "description": "Entrée invalide"
+            }
+          }
+        }
+      }
+    }
+  }
+  
